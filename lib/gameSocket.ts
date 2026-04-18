@@ -3,14 +3,14 @@ let listeners: ((msg: any) => void)[] = [];
 let reconnectTimer: any = null;
 let messageQueue: any[] = [];
 
-const WS_URL = "wss://warkabackend.onrender.com/ws";
+// ❌ remove static URL
+// const WS_URL = "wss://warkabackend.onrender.com/ws";
 
 // 🔌 CONNECT
 export function connectGameWS(
   onMessage: (msg: any) => void,
   onOpen?: () => void,
 ) {
-  // ✅ avoid duplicate listeners
   listeners = [onMessage];
 
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -20,12 +20,24 @@ export function connectGameWS(
 
   if (ws && ws.readyState === WebSocket.CONNECTING) return;
 
+  // 🔥 GET TOKEN
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("❌ No token found, cannot connect WS");
+    return;
+  }
+
+  console.log("🔐 Using token:", token);
+
+  // 🔥 ATTACH TOKEN HERE
+  const WS_URL = `wss://warkabackend.onrender.com/ws?token=${token}`;
+
   ws = new WebSocket(WS_URL);
 
   ws.onopen = () => {
     console.log("✅ WS Connected");
 
-    // flush queue
     messageQueue.forEach((msg) => {
       ws?.send(JSON.stringify(msg));
     });
