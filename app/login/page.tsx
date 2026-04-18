@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -7,7 +9,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 export default function LoginPage() {
   const params = useSearchParams();
   const router = useRouter();
-
   const setAuth = useAuthStore((s) => s.setAuth);
 
   useEffect(() => {
