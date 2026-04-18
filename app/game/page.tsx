@@ -6,7 +6,6 @@ import { connectGameWS, sendWS, disconnectWS } from "@/lib/gameSocket";
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
 import JackpotBar from "@/components/JackpotBar";
-import { useRouter } from "next/navigation";
 
 export default function GamePage() {
   const stake = useGameStore((s) => s.stake);
@@ -15,13 +14,16 @@ export default function GamePage() {
   const [taken, setTaken] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [jackpot, setJackpot] = useState(0);
-  const router = useRouter();
+  const [countdown, setCountdown] = useState<number | null>(null);
+
   useEffect(() => {
     if (!stake) return;
 
+    // reset state
     setAvailable([]);
     setTaken([]);
     setSelected(null);
+    setCountdown(null);
 
     const handleMessage = (msg: any) => {
       console.log("📩 WS:", msg);
@@ -45,6 +47,14 @@ export default function GamePage() {
           setSelected(msg.data.card_id);
           break;
 
+        case "countdown":
+          setCountdown(msg.data);
+          break;
+
+        case "start":
+          console.log("🎮 Game started!");
+          break;
+
         case "jackpot":
           setJackpot(msg.data);
           break;
@@ -52,6 +62,8 @@ export default function GamePage() {
     };
 
     connectGameWS(handleMessage, () => {
+      console.log("🚀 Joining room...");
+
       sendWS({
         type: "join",
         stake: stake,
@@ -66,12 +78,19 @@ export default function GamePage() {
   }
 
   return (
-    <div className="p-3 sm:p-4 max-w-md mx-auto pb-24">
+    <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
 
       <div className="my-3">
         <JackpotBar value={jackpot} />
       </div>
+
+      {/* 🔥 COUNTDOWN UI */}
+      {countdown !== null && (
+        <div className="text-center text-2xl font-bold text-yellow-400 mb-3">
+          Game starting in {countdown}...
+        </div>
+      )}
 
       <CardGrid
         available={available}
@@ -87,26 +106,6 @@ export default function GamePage() {
           });
         }}
       />
-
-      {/* 🔥 START GAME BUTTON (STICKY) */}
-      <div className="fixed bottom-0 left-0 w-full bg-[#0b1a2b] p-3 border-t border-gray-800">
-        <div className="max-w-md mx-auto">
-          <button
-            disabled={!selected}
-            onClick={() => {
-              // 🚀 trigger start (you can adjust backend later)
-              router.push("/play");
-            }}
-            className={`w-full py-3 rounded-xl font-bold text-lg transition ${
-              selected
-                ? "bg-green-500 hover:bg-green-600 active:scale-95 text-white"
-                : "bg-gray-600 text-gray-300 cursor-not-allowed"
-            }`}
-          >
-            {selected ? "🚀 Start Game" : "Select a Card"}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
