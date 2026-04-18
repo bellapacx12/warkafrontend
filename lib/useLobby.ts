@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useLobby() {
+export function useLobby(token: string | null) {
   const [rooms, setRooms] = useState<any[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    if (!token) return; // 🔒 don't connect without auth
+
     function connect() {
-      const ws = new WebSocket("wss://warkabackend.onrender.com/ws/lobby");
+      const ws = new WebSocket(
+        `wss://warkabackend.onrender.com/ws/lobby?token=${token}`,
+      );
+
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -19,7 +24,6 @@ export function useLobby() {
           const msg = JSON.parse(e.data);
 
           if (msg.type === "rooms") {
-            // ✅ SORT FOR CLEAN UI
             const sorted = msg.data.sort((a: any, b: any) => a.stake - b.stake);
 
             setRooms(sorted);
@@ -32,14 +36,16 @@ export function useLobby() {
       ws.onclose = () => {
         console.log("❌ Lobby WS disconnected");
 
-        // 🔁 AUTO RECONNECT
-        reconnectRef.current = setTimeout(() => {
-          connect();
-        }, 2000);
+        // 🔁 reconnect only if token still exists
+        if (token) {
+          reconnectRef.current = setTimeout(() => {
+            connect();
+          }, 2000);
+        }
       };
 
       ws.onerror = () => {
-        ws.close(); // force reconnect
+        ws.close(); // trigger reconnect
       };
     }
 
@@ -53,7 +59,7 @@ export function useLobby() {
         clearTimeout(reconnectRef.current);
       }
     };
-  }, []);
+  }, [token]); // 🔥 reconnect if token changes
 
   return rooms;
 }
