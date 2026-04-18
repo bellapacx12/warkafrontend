@@ -18,7 +18,7 @@ export default function GamePage() {
   useEffect(() => {
     if (!stake) return;
 
-    // 🔥 reset when entering room
+    // 🔥 reset room state
     setAvailable([]);
     setTaken([]);
     setSelected(null);
@@ -42,20 +42,22 @@ export default function GamePage() {
           break;
 
         case "card_selected":
-          // ✅ THIS IS IMPORTANT
-          setSelected(msg.data.card_id);
+          // ⚠️ handle both formats (safe)
+          const cardId = msg.data?.card_id ?? msg.data;
+          setSelected(cardId);
+
+          // 🔥 ensure it's marked taken locally
+          setTaken((prev) =>
+            prev.includes(cardId) ? prev : [...prev, cardId],
+          );
           break;
 
         case "jackpot":
           setJackpot(msg.data);
           break;
-
-        default:
-          break;
       }
     };
 
-    // ✅ connect and join AFTER open
     connectGameWS(handleMessage, () => {
       sendWS({
         type: "join",
@@ -72,9 +74,6 @@ export default function GamePage() {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
-  // 🔥 LIMIT cards for mobile (VERY IMPORTANT)
-  const visibleCards = available.slice(0, 60);
-
   return (
     <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
@@ -84,15 +83,16 @@ export default function GamePage() {
       </div>
 
       <CardGrid
-        available={visibleCards}
+        available={available} // ✅ DON'T SLICE HERE
         taken={taken}
         selected={selected}
         onSelect={(cardId) => {
-          // ❌ prevent selecting taken
           if (taken.includes(cardId)) return;
-
-          // ❌ prevent reselect
           if (selected) return;
+
+          // 🔥 optimistic UI (instant feedback)
+          setSelected(cardId);
+          setTaken((prev) => [...prev, cardId]);
 
           sendWS({
             type: "select_card",
