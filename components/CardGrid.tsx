@@ -1,68 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function CardGrid({
   available,
   taken,
+  selected,
   onSelect,
 }: {
   available: number[];
   taken: number[];
+  selected?: number | null;
   onSelect: (id: number) => void;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
+  const [localSelected, setLocalSelected] = useState<number | null>(null);
+
+  // 🔥 use external selected if exists, fallback to local
+  const activeSelected = selected ?? localSelected;
+
+  // 🔥 limit cards (performance + mobile)
+  const visibleCards = useMemo(() => {
+    return available.slice(0, 60);
+  }, [available]);
 
   const handleClick = (id: number) => {
-    if (!available.includes(id)) return;
     if (taken.includes(id)) return;
+    if (activeSelected) return;
 
-    setSelected(id);
+    setLocalSelected(id);
   };
 
   return (
     <div>
-      <div className="grid grid-cols-10 gap-2">
-        {Array.from({ length: 100 }, (_, i) => i + 1).map((id) => {
-          const isAvailable = available.includes(id);
+      {/* GRID */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        {visibleCards.map((id) => {
           const isTaken = taken.includes(id);
-          const isSelected = selected === id;
+          const isSelected = activeSelected === id;
 
-          let style = "bg-gray-900 text-gray-600"; // default
+          let style =
+            "bg-gray-800 text-gray-200 hover:bg-gray-700 active:scale-95";
 
-          if (isTaken) style = "bg-gray-700 text-gray-400";
-          else if (isSelected) style = "bg-purple-500 text-white";
-          else if (isAvailable) style = "bg-gray-800 text-gray-200";
+          if (isTaken) {
+            style = "bg-red-500/70 text-white cursor-not-allowed";
+          } else if (isSelected) {
+            style = "bg-yellow-400 text-black scale-105";
+          }
 
           return (
-            <div
+            <button
               key={id}
+              disabled={isTaken || !!activeSelected}
               onClick={() => handleClick(id)}
-              className={`p-3 text-center rounded-lg cursor-pointer ${style}`}
+              className={`p-4 rounded-xl font-semibold transition ${style}`}
             >
-              {id}
-            </div>
+              #{id}
+            </button>
           );
         })}
       </div>
 
       {/* ACTIONS */}
-      <div className="flex gap-4 mt-6">
+      <div className="flex gap-3 mt-6">
         <button
-          className="flex-1 bg-blue-500 py-2 rounded"
-          onClick={() => setSelected(null)}
+          className="flex-1 bg-gray-700 py-2 rounded-lg"
+          onClick={() => setLocalSelected(null)}
         >
           Refresh
         </button>
 
         <button
-          disabled={!selected}
-          className={`flex-1 py-2 rounded ${
-            selected ? "bg-orange-500" : "bg-gray-600"
+          disabled={!activeSelected}
+          className={`flex-1 py-2 rounded-lg font-semibold transition ${
+            activeSelected ? "bg-green-500 hover:bg-green-600" : "bg-gray-600"
           }`}
-          onClick={() => selected && onSelect(selected)}
+          onClick={() => activeSelected && onSelect(activeSelected)}
         >
-          Start Game
+          Confirm
         </button>
       </div>
     </div>

@@ -12,17 +12,27 @@ export default function GamePage() {
 
   const [available, setAvailable] = useState<number[]>([]);
   const [taken, setTaken] = useState<number[]>([]);
+  const [selected, setSelected] = useState<number | null>(null);
   const [jackpot, setJackpot] = useState(0);
 
   useEffect(() => {
     if (!stake) return;
 
+    // 🔥 reset when entering room
+    setAvailable([]);
+    setTaken([]);
+    setSelected(null);
+
     const handleMessage = (msg: any) => {
-      console.log("📩 WS:", msg); // 🔥 DEBUG
+      console.log("📩 WS:", msg);
 
       switch (msg.type) {
         case "cards":
           setAvailable(msg.data.map((c: any) => c.card_id));
+          break;
+
+        case "taken_cards":
+          setTaken(msg.data);
           break;
 
         case "card_taken":
@@ -31,8 +41,9 @@ export default function GamePage() {
           );
           break;
 
-        case "taken_cards":
-          setTaken(msg.data);
+        case "card_selected":
+          // ✅ THIS IS IMPORTANT
+          setSelected(msg.data.card_id);
           break;
 
         case "jackpot":
@@ -44,6 +55,7 @@ export default function GamePage() {
       }
     };
 
+    // ✅ connect and join AFTER open
     connectGameWS(handleMessage, () => {
       sendWS({
         type: "join",
@@ -60,6 +72,9 @@ export default function GamePage() {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
+  // 🔥 LIMIT cards for mobile (VERY IMPORTANT)
+  const visibleCards = available.slice(0, 60);
+
   return (
     <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
@@ -69,11 +84,15 @@ export default function GamePage() {
       </div>
 
       <CardGrid
-        available={available}
+        available={visibleCards}
         taken={taken}
+        selected={selected}
         onSelect={(cardId) => {
-          // ❌ prevent selecting taken card
+          // ❌ prevent selecting taken
           if (taken.includes(cardId)) return;
+
+          // ❌ prevent reselect
+          if (selected) return;
 
           sendWS({
             type: "select_card",
