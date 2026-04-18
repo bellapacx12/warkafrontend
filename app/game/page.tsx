@@ -109,15 +109,16 @@ export default function GamePage() {
         }}
       />
       {/* ✅ START GAME BUTTON */}
+      {/* ✅ ENTER GAME BUTTON */}
       {selected && (
-        <button
-          onClick={() => {
-            router.push("/game");
-          }}
-          className="w-full mb-4 py-3 rounded-xl bg-green-500 text-white font-bold"
-        >
-          Start Game
-        </button>
+        <div className="fixed bottom-0 left-0 w-full p-3 bg-black border-t border-gray-800">
+          <button
+            onClick={() => router.push("/play")}
+            className="w-full py-3 rounded-xl bg-green-500 text-white font-bold active:scale-95"
+          >
+            Enter Game
+          </button>
+        </div>
       )}
     </div>
   );
