@@ -6,6 +6,7 @@ import { connectGameWS, sendWS, disconnectWS } from "@/lib/gameSocket";
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
 import JackpotBar from "@/components/JackpotBar";
+import { useRouter } from "next/navigation";
 
 export default function GamePage() {
   const stake = useGameStore((s) => s.stake);
@@ -14,7 +15,7 @@ export default function GamePage() {
   const [taken, setTaken] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [jackpot, setJackpot] = useState(0);
-
+  const router = useRouter();
   useEffect(() => {
     if (!stake) return;
 
@@ -64,11 +65,8 @@ export default function GamePage() {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
-  // ✅ SHOW ALL CARDS (not only available)
-  const visibleCards = Array.from({ length: 100 }, (_, i) => i + 1);
-
   return (
-    <div className="p-3 sm:p-4 max-w-md mx-auto">
+    <div className="p-3 sm:p-4 max-w-md mx-auto pb-24">
       <TopStats />
 
       <div className="my-3">
@@ -76,7 +74,6 @@ export default function GamePage() {
       </div>
 
       <CardGrid
-        // ✅ pass all cards
         available={available}
         taken={taken}
         selected={selected}
@@ -90,6 +87,26 @@ export default function GamePage() {
           });
         }}
       />
+
+      {/* 🔥 START GAME BUTTON (STICKY) */}
+      <div className="fixed bottom-0 left-0 w-full bg-[#0b1a2b] p-3 border-t border-gray-800">
+        <div className="max-w-md mx-auto">
+          <button
+            disabled={!selected}
+            onClick={() => {
+              // 🚀 trigger start (you can adjust backend later)
+              router.push("/play");
+            }}
+            className={`w-full py-3 rounded-xl font-bold text-lg transition ${
+              selected
+                ? "bg-green-500 hover:bg-green-600 active:scale-95 text-white"
+                : "bg-gray-600 text-gray-300 cursor-not-allowed"
+            }`}
+          >
+            {selected ? "🚀 Start Game" : "Select a Card"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
