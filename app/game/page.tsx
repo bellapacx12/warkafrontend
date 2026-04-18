@@ -6,6 +6,7 @@ import { connectGameWS, sendWS, disconnectWS } from "@/lib/gameSocket";
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
 import JackpotBar from "@/components/JackpotBar";
+import { useRouter } from "next/navigation";
 
 export default function GamePage() {
   const stake = useGameStore((s) => s.stake);
@@ -77,6 +78,7 @@ export default function GamePage() {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
+  const router = useRouter();
   return (
     <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
@@ -106,6 +108,17 @@ export default function GamePage() {
           });
         }}
       />
+      {/* ✅ START GAME BUTTON */}
+      {selected && (
+        <button
+          onClick={() => {
+            router.push("/game");
+          }}
+          className="w-full mb-4 py-3 rounded-xl bg-green-500 text-white font-bold"
+        >
+          Start Game
+        </button>
+      )}
     </div>
   );
 }
