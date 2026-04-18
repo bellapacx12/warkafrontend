@@ -18,6 +18,8 @@ export default function GamePage() {
     if (!stake) return;
 
     const handleMessage = (msg: any) => {
+      console.log("📩 WS:", msg); // 🔥 DEBUG
+
       switch (msg.type) {
         case "cards":
           setAvailable(msg.data.map((c: any) => c.card_id));
@@ -42,7 +44,6 @@ export default function GamePage() {
       }
     };
 
-    // 🔥 connect + send join ONLY after WS opens
     connectGameWS(handleMessage, () => {
       sendWS({
         type: "join",
@@ -71,6 +72,9 @@ export default function GamePage() {
         available={available}
         taken={taken}
         onSelect={(cardId) => {
+          // ❌ prevent selecting taken card
+          if (taken.includes(cardId)) return;
+
           sendWS({
             type: "select_card",
             card_id: cardId,
