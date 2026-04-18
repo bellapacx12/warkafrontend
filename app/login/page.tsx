@@ -1,18 +1,17 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export default function LoginPage() {
-  const params = useSearchParams();
+export default function LoginClient() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   useEffect(() => {
-    const token = params.get("token");
+    // ✅ manually read URL
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get("token");
 
     if (!token) {
       router.push("/");
