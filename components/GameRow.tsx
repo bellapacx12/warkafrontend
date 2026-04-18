@@ -25,27 +25,37 @@ export default function GameRow({
   const setStake = useGameStore((s) => s.setStake);
 
   return (
-    <div className="bg-[#0b1a2b] p-4 rounded-xl mb-4">
-      <div className="flex justify-between items-center">
+    <div className="bg-[#0b1a2b] p-4 rounded-2xl mb-4 shadow-md">
+      {/* 🔥 Top Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {/* 💰 Stake */}
         <div>
-          <p className="text-lg font-bold">{stake} ETB</p>
+          <p className="text-xl font-bold">{stake} ETB</p>
         </div>
 
-        <div className="text-center">
-          <p className="text-yellow-400 font-bold">🏆 {win}</p>
-          <p className="text-xs text-gray-400">{players} players</p>
+        {/* 🏆 Win + players */}
+        <div className="flex justify-between sm:block text-center">
+          <div>
+            <p className="text-yellow-400 font-bold text-lg">🏆 {win}</p>
+            <p className="text-xs text-gray-400">{players} players</p>
+          </div>
         </div>
 
-        <div className="text-right">
-          <p className="text-xs text-blue-400">{status}</p>
+        {/* 🎮 Status + Button */}
+        <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2">
+          <div className="text-right">
+            <p className="text-xs text-blue-400">{status}</p>
 
-          {status === "countdown" && <p className="text-sm">{countdown}s</p>}
+            {status === "countdown" && (
+              <p className="text-sm font-semibold">{countdown}s</p>
+            )}
+          </div>
 
           <button
-            className="bg-green-500 px-3 py-1 rounded mt-1 hover:bg-green-600 transition"
+            className="bg-green-500 w-full sm:w-auto px-4 py-2 rounded-lg font-semibold text-sm hover:bg-green-600 active:scale-95 transition"
             onClick={() => {
-              setStake(stake); // ✅ save stake
-              router.push("/game"); // ✅ no params
+              setStake(stake);
+              router.push("/game");
             }}
           >
             JOIN
@@ -53,7 +63,10 @@ export default function GameRow({
         </div>
       </div>
 
-      <JackpotBar value={jackpot} />
+      {/* 🎰 Jackpot */}
+      <div className="mt-3">
+        <JackpotBar value={jackpot} />
+      </div>
     </div>
   );
 }
