@@ -18,7 +18,6 @@ export default function GamePage() {
   useEffect(() => {
     if (!stake) return;
 
-    // 🔥 reset room state
     setAvailable([]);
     setTaken([]);
     setSelected(null);
@@ -42,14 +41,7 @@ export default function GamePage() {
           break;
 
         case "card_selected":
-          // ⚠️ handle both formats (safe)
-          const cardId = msg.data?.card_id ?? msg.data;
-          setSelected(cardId);
-
-          // 🔥 ensure it's marked taken locally
-          setTaken((prev) =>
-            prev.includes(cardId) ? prev : [...prev, cardId],
-          );
+          setSelected(msg.data.card_id);
           break;
 
         case "jackpot":
@@ -65,14 +57,15 @@ export default function GamePage() {
       });
     });
 
-    return () => {
-      disconnectWS();
-    };
+    return () => disconnectWS();
   }, [stake]);
 
   if (!stake) {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
+
+  // ✅ SHOW ALL CARDS (not only available)
+  const visibleCards = Array.from({ length: 100 }, (_, i) => i + 1);
 
   return (
     <div className="p-3 sm:p-4 max-w-md mx-auto">
@@ -83,16 +76,13 @@ export default function GamePage() {
       </div>
 
       <CardGrid
-        available={available} // ✅ DON'T SLICE HERE
+        // ✅ pass all cards
+        available={available}
         taken={taken}
         selected={selected}
         onSelect={(cardId) => {
           if (taken.includes(cardId)) return;
           if (selected) return;
-
-          // 🔥 optimistic UI (instant feedback)
-          setSelected(cardId);
-          setTaken((prev) => [...prev, cardId]);
 
           sendWS({
             type: "select_card",
