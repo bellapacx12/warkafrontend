@@ -7,7 +7,7 @@ export function useLobby() {
 
   useEffect(() => {
     function connect() {
-      const ws = new WebSocket("ws://localhost:8080/ws/lobby");
+      const ws = new WebSocket("wss://warkabackend.onrender.com/ws/lobby");
       wsRef.current = ws;
 
       ws.onopen = () => {

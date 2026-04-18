@@ -5,7 +5,7 @@ let reconnectTimer: any = null;
 // queue messages if not connected yet
 let messageQueue: any[] = [];
 
-const WS_URL = "ws://localhost:8080/ws";
+const WS_URL = "wss://warkabackend.onrender.com/ws";
 
 // 🔌 CONNECT
 export function connectGameWS(onMessage: (msg: any) => void) {
