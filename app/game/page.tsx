@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/store/useGame";
-import { useUserStore } from "@/store/useUser";
 import { connectGameWS, sendWS, disconnectWS } from "@/lib/gameSocket";
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
@@ -10,56 +9,63 @@ import JackpotBar from "@/components/JackpotBar";
 
 export default function GamePage() {
   const stake = useGameStore((s) => s.stake);
-  const userId = useUserStore((s) => s.userId);
 
   const [available, setAvailable] = useState<number[]>([]);
   const [taken, setTaken] = useState<number[]>([]);
-  const [jackpot, setJackpot] = useState(469.8);
+  const [jackpot, setJackpot] = useState(0);
 
   useEffect(() => {
     if (!stake) return;
 
     const handleMessage = (msg: any) => {
-      if (msg.type === "cards") {
-        setAvailable(msg.data.map((c: any) => c.card_id));
-      }
+      switch (msg.type) {
+        case "cards":
+          setAvailable(msg.data.map((c: any) => c.card_id));
+          break;
 
-      if (msg.type === "card_taken") {
-        setTaken((prev) =>
-          prev.includes(msg.data) ? prev : [...prev, msg.data],
-        );
-      }
+        case "card_taken":
+          setTaken((prev) =>
+            prev.includes(msg.data) ? prev : [...prev, msg.data],
+          );
+          break;
 
-      if (msg.type === "taken_cards") {
-        setTaken(msg.data);
-      }
+        case "taken_cards":
+          setTaken(msg.data);
+          break;
 
-      if (msg.type === "jackpot") {
-        setJackpot(msg.data);
+        case "jackpot":
+          setJackpot(msg.data);
+          break;
+
+        default:
+          break;
       }
     };
 
-    connectGameWS(handleMessage);
-
-    sendWS({
-      type: "join",
-      user_id: userId,
-      stake: stake,
+    // 🔥 connect + send join ONLY after WS opens
+    connectGameWS(handleMessage, () => {
+      sendWS({
+        type: "join",
+        stake: stake,
+      });
     });
 
     return () => {
       disconnectWS();
     };
-  }, [stake, userId]);
+  }, [stake]);
 
   if (!stake) {
-    return <p className="p-4">No game selected</p>;
+    return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
   return (
-    <div className="p-4">
+    <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
-      <JackpotBar value={jackpot} />
+
+      <div className="my-3">
+        <JackpotBar value={jackpot} />
+      </div>
 
       <CardGrid
         available={available}
@@ -67,7 +73,6 @@ export default function GamePage() {
         onSelect={(cardId) => {
           sendWS({
             type: "select_card",
-            user_id: userId,
             card_id: cardId,
           });
         }}
