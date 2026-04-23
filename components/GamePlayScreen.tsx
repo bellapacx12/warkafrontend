@@ -12,6 +12,7 @@ export default function GamePlayScreen() {
   const connect = useGameStore((s) => s.connect);
   const disconnect = useGameStore((s) => s.disconnect);
   const sendBingo = useGameStore((s) => s.sendBingo);
+  const winner = useGameStore((s) => s.winner);
   const isConnected = useGameStore((s) => s.isConnected);
 
   useEffect(() => {
@@ -152,6 +153,41 @@ export default function GamePlayScreen() {
           Leave
         </button>
       </div>
+      {winner && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-[#0b1a2b] p-4 rounded-xl w-[90%] max-w-sm text-center">
+            {/* TITLE */}
+            <h2 className="text-xl font-bold text-yellow-400 mb-2">
+              🎉 WINNER!
+            </h2>
+
+            {/* NAME */}
+            <p className="text-lg font-bold mb-3">{winner.name}</p>
+
+            {/* CARD */}
+            <div className="grid grid-cols-5 gap-1 mb-3">
+              {winner.card.flat().map((cell: any, i: number) => (
+                <div
+                  key={i}
+                  className={`aspect-square flex items-center justify-center rounded text-xs font-bold ${
+                    cell === "FREE" ? "bg-purple-500" : "bg-green-500"
+                  }`}
+                >
+                  {cell === "FREE" ? "*" : cell}
+                </div>
+              ))}
+            </div>
+
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={() => useGameStore.setState({ winner: null })}
+              className="bg-blue-500 px-4 py-2 rounded w-full"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

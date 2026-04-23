@@ -7,12 +7,20 @@ import {
   removeListener,
 } from "@/lib/gameSocket";
 
+type Winner = {
+  name: string;
+  card: any[][];
+};
+
 type GameState = {
   // ===== GAME =====
   calledNumbers: number[];
   currentNumber: number | null;
   countdown: number;
   card: any[][] | null;
+
+  // ✅ NEW
+  winner: Winner | null;
 
   // ===== LOBBY =====
   available: number[];
@@ -43,6 +51,9 @@ export const useGameStore = create<GameState>()(
       countdown: 0,
       card: null,
 
+      // ✅ NEW
+      winner: null,
+
       // ===== LOBBY =====
       available: [],
       taken: [],
@@ -71,6 +82,9 @@ export const useGameStore = create<GameState>()(
           const { type, data } = msg;
 
           switch (type) {
+            // ==========================
+            // INIT
+            // ==========================
             case "init":
               set({
                 calledNumbers: data.called || [],
@@ -78,10 +92,16 @@ export const useGameStore = create<GameState>()(
               });
               break;
 
+            // ==========================
+            // CARD
+            // ==========================
             case "card":
               set({ card: data.grid });
               break;
 
+            // ==========================
+            // NUMBER CALL
+            // ==========================
             case "number":
               set((state) => ({
                 currentNumber: data,
@@ -89,11 +109,54 @@ export const useGameStore = create<GameState>()(
               }));
               break;
 
+            // ==========================
+            // COUNTDOWN
+            // ==========================
             case "countdown":
               set({ countdown: data });
               break;
 
-            // ===== LOBBY =====
+            // ==========================
+            // GAME START (RESET ROUND UI)
+            // ==========================
+            case "start":
+              set({
+                winner: null,
+                calledNumbers: [],
+                currentNumber: null,
+                countdown: 0,
+              });
+              break;
+
+            // ==========================
+            // WINNER 🎉
+            // ==========================
+            case "winner":
+              set({
+                winner: {
+                  name: data.name,
+                  card: data.card,
+                },
+              });
+              break;
+
+            // ==========================
+            // ROUND RESET (SERVER FORCES RESET)
+            // ==========================
+            case "round_reset":
+              set({
+                calledNumbers: [],
+                currentNumber: null,
+                countdown: 0,
+                card: null,
+                selected: null,
+                winner: null,
+              });
+              break;
+
+            // ==========================
+            // LOBBY
+            // ==========================
             case "cards":
               set({ available: data.map((c: any) => c.card_id) });
               break;
@@ -116,13 +179,8 @@ export const useGameStore = create<GameState>()(
               set({ jackpot: data });
               break;
 
-            case "start":
-              console.log("🎮 Game started!");
-              break;
-
-            case "winner":
-              console.log("🏆 Winner:", data);
-              break;
+            default:
+              console.log("⚠️ Unknown WS event:", type);
           }
         };
 
@@ -157,6 +215,7 @@ export const useGameStore = create<GameState>()(
           currentNumber: null,
           countdown: 0,
           card: null,
+          winner: null,
 
           available: [],
           taken: [],
@@ -183,9 +242,8 @@ export const useGameStore = create<GameState>()(
       },
     }),
     {
-      name: "game-storage", // 🔥 localStorage key
+      name: "game-storage",
 
-      // ✅ ONLY persist what matters
       partialize: (state) => ({
         stake: state.stake,
       }),
