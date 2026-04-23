@@ -4,27 +4,28 @@ import { useEffect } from "react";
 import { useGameStore } from "@/store/useGame";
 
 export default function GamePlayScreen() {
-  const {
-    calledNumbers,
-    currentNumber,
-    countdown,
-    card,
-    stake,
-    connect,
-    disconnect,
-    sendBingo,
-  } = useGameStore();
+  const calledNumbers = useGameStore((s) => s.calledNumbers);
+  const currentNumber = useGameStore((s) => s.currentNumber);
+  const countdown = useGameStore((s) => s.countdown);
+  const card = useGameStore((s) => s.card);
+  const stake = useGameStore((s) => s.stake);
+  const connect = useGameStore((s) => s.connect);
+  const disconnect = useGameStore((s) => s.disconnect);
+  const sendBingo = useGameStore((s) => s.sendBingo);
+  const isConnected = useGameStore((s) => s.isConnected);
 
-  // 🔌 CONNECT ON LOAD
+  // 🔌 CONNECT ONLY IF NOT CONNECTED
   useEffect(() => {
-    const stakeValue = 10; // TODO: dynamic from route
+    if (!stake) return;
 
-    connect(stakeValue);
+    if (!isConnected) {
+      connect(stake); // ✅ USE REAL STAKE
+    }
 
     return () => {
       disconnect();
     };
-  }, []);
+  }, [stake, isConnected, connect, disconnect]);
 
   const isCalled = (num: number | string) =>
     typeof num === "number" && calledNumbers.includes(num);
@@ -34,7 +35,7 @@ export default function GamePlayScreen() {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-3">
         <p className="font-bold text-lg">🎯 Bingo Room</p>
-        <p className="text-sm text-gray-400">Stake: {stake} ETB</p>
+        <p className="text-sm text-gray-400">Stake: {stake ?? "-"} ETB</p>
       </div>
 
       {/* TOP STATS */}
