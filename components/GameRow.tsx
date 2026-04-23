@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import JackpotBar from "./JackpotBar";
-import { useGameStores } from "@/store/useGames";
+import { useGameStore } from "@/store/useGame";
 
 interface Props {
   stake: number;
@@ -22,7 +22,7 @@ export default function GameRow({
   jackpot,
 }: Props) {
   const router = useRouter();
-  const setStake = useGameStores((s) => s.setStake);
+  const setStake = useGameStore((s) => s.setStake);
 
   return (
     <div className="bg-[#0b1a2b] p-4 rounded-2xl mb-4 shadow-md">
@@ -54,6 +54,7 @@ export default function GameRow({
           <button
             className="bg-green-500 w-full sm:w-auto px-4 py-2 rounded-lg font-semibold text-sm hover:bg-green-600 active:scale-95 transition"
             onClick={() => {
+              console.log("CLICKED, stake:", stake);
               setStake(stake);
               router.push("/game");
             }}
