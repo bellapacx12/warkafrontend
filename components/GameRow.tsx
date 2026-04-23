@@ -23,7 +23,9 @@ export default function GameRow({
 }: Props) {
   const router = useRouter();
   const setStake = useGameStore((s) => s.setStake);
-
+  const activeGame = useGameStore((s) => s.activeGame);
+  const isRejoin =
+    activeGame && activeGame.stake === stake && activeGame.state !== "finished";
   return (
     <div className="bg-[#0b1a2b] p-4 rounded-2xl mb-4 shadow-md">
       {/* 🔥 Top Row */}
@@ -52,14 +54,17 @@ export default function GameRow({
           </div>
 
           <button
-            className="bg-green-500 w-full sm:w-auto px-4 py-2 rounded-lg font-semibold text-sm hover:bg-green-600 active:scale-95 transition"
+            className={`w-full sm:w-auto px-4 py-2 rounded-lg font-semibold text-sm transition ${
+              isRejoin
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-green-500 hover:bg-green-600"
+            }`}
             onClick={() => {
-              console.log("CLICKED, stake:", stake);
               setStake(stake);
               router.push("/game");
             }}
           >
-            JOIN
+            {isRejoin ? "REJOIN" : "JOIN"}
           </button>
         </div>
       </div>

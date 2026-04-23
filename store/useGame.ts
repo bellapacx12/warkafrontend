@@ -40,6 +40,12 @@ type GameState = {
   disconnect: () => void;
   sendBingo: () => void;
   selectCard: (cardId: number) => void;
+
+  // ======= rejoin ====
+  activeGame: {
+    stake: number;
+    state: string;
+  } | null;
 };
 
 export const useGameStore = create<GameState>()(
@@ -53,6 +59,8 @@ export const useGameStore = create<GameState>()(
       balance: 0,
       // ✅ NEW
       winner: null,
+
+      activeGame: null,
 
       // ===== LOBBY =====
       available: [],
@@ -153,9 +161,18 @@ export const useGameStore = create<GameState>()(
                 card: null,
                 selected: null,
                 winner: null,
+                activeGame: null, // ✅ important
               });
               break;
 
+            case "active_game":
+              set({
+                activeGame: {
+                  stake: data.stake,
+                  state: data.state,
+                },
+              });
+              break;
             // ==========================
             // LOBBY
             // ==========================

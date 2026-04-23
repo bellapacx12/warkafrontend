@@ -1,11 +1,14 @@
 "use client";
 
+import { useGameStore } from "@/store/useGame";
+
 export default function TopStats() {
+  const balance = useGameStore((s) => s.balance);
   return (
     <div className="grid grid-cols-4 gap-2 mb-4 text-center">
       <div className="bg-[#1a2a3d] p-2 rounded-lg">
         <p className="text-xs text-gray-400">Wallet</p>
-        <p className="font-bold">203.72</p>
+        <p className="font-bold">{balance.toFixed(2)}</p>
       </div>
 
       <div className="bg-[#1a2a3d] p-2 rounded-lg">
