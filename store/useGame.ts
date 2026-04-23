@@ -18,7 +18,7 @@ type GameState = {
   currentNumber: number | null;
   countdown: number;
   card: any[][] | null;
-
+  balance: number;
   // ✅ NEW
   winner: Winner | null;
 
@@ -50,7 +50,7 @@ export const useGameStore = create<GameState>()(
       currentNumber: null,
       countdown: 0,
       card: null,
-
+      balance: 0,
       // ✅ NEW
       winner: null,
 
@@ -91,7 +91,9 @@ export const useGameStore = create<GameState>()(
                 countdown: data.countdown || 0,
               });
               break;
-
+            case "balance":
+              set({ balance: data });
+              break;
             // ==========================
             // CARD
             // ==========================
