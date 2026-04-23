@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useGameStore } from "@/store/useGame";
+import { useGameStore } from "@/store/useGame"; // ✅ ONLY THIS STORE
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
 import JackpotBar from "@/components/JackpotBar";
 import { useRouter } from "next/navigation";
 
 export default function GamePage() {
-  // ✅ USE SELECTORS (fix TS + performance)
+  // ✅ ALL FROM SAME STORE
   const stake = useGameStore((s) => s.stake);
   const available = useGameStore((s) => s.available);
   const taken = useGameStore((s) => s.taken);
   const selected = useGameStore((s) => s.selected);
   const jackpot = useGameStore((s) => s.jackpot);
   const countdown = useGameStore((s) => s.countdown);
-  const connect = useGameStore((s) => s.connect);
+  const connect = useGameStore((s) => s.connect); // ✅ FIXED
   const selectCard = useGameStore((s) => s.selectCard);
 
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function GamePage() {
     if (!stake) return;
 
     connect(stake);
-  }, [stake, connect]);
+  }, [stake]);
 
   if (!stake) {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
@@ -54,7 +54,7 @@ export default function GamePage() {
           if (taken.includes(cardId)) return;
           if (selected) return;
 
-          selectCard(cardId); // ✅ store handles WS
+          selectCard(cardId);
         }}
       />
 

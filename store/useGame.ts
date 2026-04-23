@@ -27,6 +27,7 @@ type GameState = {
   _handler?: (msg: any) => void;
 
   // ===== ACTIONS =====
+  setStake: (stake: number) => void; // ✅ ADDED
   connect: (stake: number) => void;
   disconnect: () => void;
   sendBingo: () => void;
@@ -53,10 +54,15 @@ export const useGameStore = create<GameState>()((set, get) => ({
   _handler: undefined,
 
   // ==========================
+  // SET STAKE
+  // ==========================
+  setStake: (stake) => set({ stake }),
+
+  // ==========================
   // CONNECT
   // ==========================
   connect: (stake: number) => {
-    const { isConnected, _handler } = get();
+    const { isConnected } = get();
 
     // ✅ prevent duplicate connections
     if (isConnected) return;
