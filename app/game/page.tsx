@@ -1,84 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGameStore } from "@/store/useGame";
-import { connectGameWS, sendWS, disconnectWS } from "@/lib/gameSocket";
 import CardGrid from "@/components/CardGrid";
 import TopStats from "@/components/TopStats";
 import JackpotBar from "@/components/JackpotBar";
 import { useRouter } from "next/navigation";
 
 export default function GamePage() {
+  // ✅ USE SELECTORS (fix TS + performance)
   const stake = useGameStore((s) => s.stake);
+  const available = useGameStore((s) => s.available);
+  const taken = useGameStore((s) => s.taken);
+  const selected = useGameStore((s) => s.selected);
+  const jackpot = useGameStore((s) => s.jackpot);
+  const countdown = useGameStore((s) => s.countdown);
+  const connect = useGameStore((s) => s.connect);
+  const selectCard = useGameStore((s) => s.selectCard);
 
-  const [available, setAvailable] = useState<number[]>([]);
-  const [taken, setTaken] = useState<number[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [jackpot, setJackpot] = useState(0);
-  const [countdown, setCountdown] = useState<number | null>(null);
+  const router = useRouter();
 
+  // 🔌 CONNECT ON LOAD
   useEffect(() => {
     if (!stake) return;
 
-    // reset state
-    setAvailable([]);
-    setTaken([]);
-    setSelected(null);
-    setCountdown(null);
-
-    const handleMessage = (msg: any) => {
-      console.log("📩 WS:", msg);
-
-      switch (msg.type) {
-        case "cards":
-          setAvailable(msg.data.map((c: any) => c.card_id));
-          break;
-
-        case "taken_cards":
-          setTaken(msg.data);
-          break;
-
-        case "card_taken":
-          setTaken((prev) =>
-            prev.includes(msg.data) ? prev : [...prev, msg.data],
-          );
-          break;
-
-        case "card_selected":
-          setSelected(msg.data.card_id);
-          break;
-
-        case "countdown":
-          setCountdown(msg.data);
-          break;
-
-        case "start":
-          console.log("🎮 Game started!");
-          break;
-
-        case "jackpot":
-          setJackpot(msg.data);
-          break;
-      }
-    };
-
-    connectGameWS(handleMessage, () => {
-      console.log("🚀 Joining room...");
-
-      sendWS({
-        type: "join",
-        stake: stake,
-      });
-    });
-
-    return () => disconnectWS();
-  }, [stake]);
+    connect(stake);
+  }, [stake, connect]);
 
   if (!stake) {
     return <p className="p-4 text-center text-gray-400">No game selected</p>;
   }
 
-  const router = useRouter();
   return (
     <div className="p-3 sm:p-4 max-w-md mx-auto">
       <TopStats />
@@ -88,7 +40,7 @@ export default function GamePage() {
       </div>
 
       {/* 🔥 COUNTDOWN UI */}
-      {countdown !== null && (
+      {countdown > 0 && (
         <div className="text-center text-2xl font-bold text-yellow-400 mb-3">
           Game starting in {countdown}...
         </div>
@@ -102,14 +54,11 @@ export default function GamePage() {
           if (taken.includes(cardId)) return;
           if (selected) return;
 
-          sendWS({
-            type: "select_card",
-            card_id: cardId,
-          });
+          selectCard(cardId); // ✅ store handles WS
         }}
       />
-      {/* ✅ START GAME BUTTON */}
-      {/* ✅ ENTER GAME BUTTON */}
+
+      {/* ENTER GAME */}
       {selected && (
         <div className="fixed bottom-0 left-0 w-full p-3 bg-black border-t border-gray-800">
           <button

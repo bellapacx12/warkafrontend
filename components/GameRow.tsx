@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import JackpotBar from "./JackpotBar";
-import { useGameStore } from "@/store/useGame";
+import { useGameStores } from "@/store/useGames";
 
 interface Props {
   stake: number;
@@ -22,7 +22,7 @@ export default function GameRow({
   jackpot,
 }: Props) {
   const router = useRouter();
-  const setStake = useGameStore((s) => s.setStake);
+  const setStake = useGameStores((s) => s.setStake);
 
   return (
     <div className="bg-[#0b1a2b] p-4 rounded-2xl mb-4 shadow-md">
