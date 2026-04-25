@@ -104,6 +104,11 @@ export const useGameStore = create<GameState>()(
               set({
                 calledNumbers: data.called || [],
                 countdown: data.countdown || 0,
+
+                // ✅ FIX: restore last number properly
+                currentNumber: data.called?.length
+                  ? data.called[data.called.length - 1]
+                  : null,
               });
               break;
             case "balance":
@@ -120,10 +125,16 @@ export const useGameStore = create<GameState>()(
             // NUMBER CALL
             // ==========================
             case "number":
-              set((state) => ({
-                currentNumber: data,
-                calledNumbers: [...state.calledNumbers, data],
-              }));
+              set((state) => {
+                const exists = state.calledNumbers.includes(data);
+
+                return {
+                  currentNumber: data,
+                  calledNumbers: exists
+                    ? state.calledNumbers
+                    : [...state.calledNumbers, data],
+                };
+              });
               break;
 
             // ==========================
@@ -181,12 +192,14 @@ export const useGameStore = create<GameState>()(
               break;
 
             case "active_game":
-              set({
-                activeGame: {
-                  stake: data.stake,
-                  state: data.state,
-                },
-              });
+              set((s) => ({
+                activeGame: s.activeGame
+                  ? s.activeGame
+                  : {
+                      stake,
+                      state: rejoin ? "playing" : "waiting",
+                    },
+              }));
               break;
             // ==========================
             // LOBBY
@@ -215,6 +228,10 @@ export const useGameStore = create<GameState>()(
             case "game_finished":
               set({
                 activeGame: null,
+                calledNumbers: [],
+                currentNumber: null,
+                card: null,
+                countdown: 0,
               });
               break;
 
