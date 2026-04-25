@@ -87,12 +87,7 @@ export const useGameStore = create<GameState>()(
         if (isConnected) return;
 
         // 🔥 IMPORTANT: set active game immediately
-        set({
-          activeGame: {
-            stake,
-            state: rejoin ? "playing" : "waiting",
-          },
-        });
+
         const handler = (msg: any) => {
           const { type, data } = msg;
 
