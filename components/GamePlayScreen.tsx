@@ -113,7 +113,7 @@ export default function GamePlayScreen() {
               </p>
             ) : (
               <div className="grid grid-cols-5 gap-1">
-                {card.flat().map((cell, i) => {
+                {card.flat().map((cell: any, i: number) => {
                   const called = isCalled(cell);
 
                   return (
