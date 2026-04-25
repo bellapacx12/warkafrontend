@@ -13,17 +13,16 @@ export default function GamePlayScreen() {
   const disconnect = useGameStore((s) => s.disconnect);
   const sendBingo = useGameStore((s) => s.sendBingo);
   const winner = useGameStore((s) => s.winner);
-  const isConnected = useGameStore((s) => s.isConnected);
 
+  const activeGame = useGameStore((s) => s.activeGame);
   useEffect(() => {
     if (!stake) return;
 
-    connect(stake, true); // 🔥 always call once
+    const isRejoin = !!activeGame && activeGame.stake === stake;
+    connect(stake, isRejoin);
 
-    return () => {
-      disconnect();
-    };
-  }, [stake]);
+    return () => disconnect();
+  }, [stake, activeGame]);
 
   const isCalled = (num: number | string) =>
     typeof num === "number" && calledNumbers.includes(num);
