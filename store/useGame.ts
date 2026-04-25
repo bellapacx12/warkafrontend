@@ -109,6 +109,7 @@ export const useGameStore = create<GameState>()(
                 currentNumber: data.called?.length
                   ? data.called[data.called.length - 1]
                   : null,
+                card: data.card || null, // 🔥 ADD THIS
               });
               break;
             case "balance":
