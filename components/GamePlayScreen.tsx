@@ -19,10 +19,13 @@ export default function GamePlayScreen() {
     if (!stake) return;
 
     const isRejoin = !!activeGame && activeGame.stake === stake;
+
     connect(stake, isRejoin);
 
-    return () => disconnect();
-  }, [stake, activeGame]);
+    return () => {
+      disconnect();
+    };
+  }, [stake]);
 
   const isCalled = (num: number | string) =>
     typeof num === "number" && calledNumbers.includes(num);
