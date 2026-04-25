@@ -84,8 +84,9 @@ export const useGameStore = create<GameState>()(
       // ==========================
       connect: (stake: number, rejoin = false) => {
         const { isConnected } = get();
-        if (isConnected) return;
-
+        if (isConnected) {
+          disconnectWS();
+        }
         // 🔥 IMPORTANT: set active game immediately
         set({
           activeGame: {
