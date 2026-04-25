@@ -270,7 +270,6 @@ export const useGameStore = create<GameState>()(
           calledNumbers: [],
           currentNumber: null,
           countdown: 0,
-          card: null,
           winner: null,
 
           available: [],
