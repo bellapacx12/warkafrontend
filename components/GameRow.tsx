@@ -33,7 +33,7 @@ export default function GameRow({
     setStake(stake);
 
     if (isRejoin) {
-      router.push("/game?rejoin=true"); // ✅ rejoin mode
+      router.push("/play"); // ✅ rejoin mode
     } else {
       router.push("/game");
     }
