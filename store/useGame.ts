@@ -192,14 +192,12 @@ export const useGameStore = create<GameState>()(
               break;
 
             case "active_game":
-              set((s) => ({
-                activeGame: s.activeGame
-                  ? s.activeGame
-                  : {
-                      stake,
-                      state: rejoin ? "playing" : "waiting",
-                    },
-              }));
+              set({
+                activeGame: {
+                  stake: data.stake,
+                  state: data.state,
+                },
+              });
               break;
             // ==========================
             // LOBBY
