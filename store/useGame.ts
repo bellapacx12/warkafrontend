@@ -36,7 +36,7 @@ type GameState = {
 
   // ===== ACTIONS =====
   setStake: (stake: number) => void;
-  connect: (stake: number) => void;
+  connect: (stake: number, rejoin?: boolean) => void;
   disconnect: () => void;
   sendBingo: () => void;
   selectCard: (cardId: number) => void;
@@ -82,7 +82,7 @@ export const useGameStore = create<GameState>()(
       // ==========================
       // CONNECT
       // ==========================
-      connect: (stake: number) => {
+      connect: (stake: number, rejoin = false) => {
         const { isConnected } = get();
         if (isConnected) return;
 
@@ -90,7 +90,7 @@ export const useGameStore = create<GameState>()(
         set({
           activeGame: {
             stake,
-            state: "waiting",
+            state: rejoin ? "playing" : "waiting",
           },
         });
         const handler = (msg: any) => {
