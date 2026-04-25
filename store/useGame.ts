@@ -86,6 +86,13 @@ export const useGameStore = create<GameState>()(
         const { isConnected } = get();
         if (isConnected) return;
 
+        // 🔥 IMPORTANT: set active game immediately
+        set({
+          activeGame: {
+            stake,
+            state: "waiting",
+          },
+        });
         const handler = (msg: any) => {
           const { type, data } = msg;
 
@@ -123,19 +130,27 @@ export const useGameStore = create<GameState>()(
             // COUNTDOWN
             // ==========================
             case "countdown":
-              set({ countdown: data });
+              set((s) => ({
+                countdown: data,
+                activeGame: s.activeGame
+                  ? { ...s.activeGame, state: "countdown" }
+                  : null,
+              }));
               break;
 
             // ==========================
             // GAME START (RESET ROUND UI)
             // ==========================
             case "start":
-              set({
+              set((s) => ({
                 winner: null,
                 calledNumbers: [],
                 currentNumber: null,
                 countdown: 0,
-              });
+                activeGame: s.activeGame
+                  ? { ...s.activeGame, state: "playing" }
+                  : null,
+              }));
               break;
 
             // ==========================
