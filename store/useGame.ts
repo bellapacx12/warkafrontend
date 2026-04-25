@@ -197,6 +197,11 @@ export const useGameStore = create<GameState>()(
             case "jackpot":
               set({ jackpot: data });
               break;
+            case "game_finished":
+              set({
+                activeGame: null,
+              });
+              break;
 
             default:
               console.log("⚠️ Unknown WS event:", type);
@@ -265,6 +270,7 @@ export const useGameStore = create<GameState>()(
 
       partialize: (state) => ({
         stake: state.stake,
+        activeGame: state.activeGame, // ✅ ADD THIS
       }),
     },
   ),
