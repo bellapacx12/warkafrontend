@@ -87,7 +87,12 @@ export const useGameStore = create<GameState>()(
         if (isConnected) return;
 
         // 🔥 IMPORTANT: set active game immediately
-
+        set({
+          activeGame: {
+            stake,
+            state: rejoin ? "playing" : "waiting",
+          },
+        });
         const handler = (msg: any) => {
           const { type, data } = msg;
 
@@ -187,12 +192,14 @@ export const useGameStore = create<GameState>()(
               break;
 
             case "active_game":
-              set({
-                activeGame: {
-                  stake: data.stake,
-                  state: data.state,
-                },
-              });
+              set((s) => ({
+                activeGame: s.activeGame
+                  ? s.activeGame
+                  : {
+                      stake,
+                      state: rejoin ? "playing" : "waiting",
+                    },
+              }));
               break;
             // ==========================
             // LOBBY
@@ -223,7 +230,6 @@ export const useGameStore = create<GameState>()(
                 activeGame: null,
                 calledNumbers: [],
                 currentNumber: null,
-                card: null,
                 countdown: 0,
               });
               break;
