@@ -17,10 +17,13 @@ export default function GamePlayScreen() {
 
   useEffect(() => {
     if (!stake) return;
-    if (!isConnected) connect(stake);
 
-    return () => disconnect();
-  }, [stake, isConnected, connect, disconnect]);
+    connect(stake, true); // 🔥 always call once
+
+    return () => {
+      disconnect();
+    };
+  }, [stake]);
 
   const isCalled = (num: number | string) =>
     typeof num === "number" && calledNumbers.includes(num);
