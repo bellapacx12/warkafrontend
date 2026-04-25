@@ -114,17 +114,11 @@ export default function GamePlayScreen() {
             ) : (
               <div className="grid grid-cols-5 gap-1">
                 {card.flat().map((cell: any, i: number) => {
-                  const called = isCalled(cell);
-
                   return (
                     <div
                       key={i}
                       className={`aspect-square flex items-center justify-center rounded text-sm font-bold ${
-                        cell === "FREE"
-                          ? "bg-purple-500"
-                          : called
-                            ? "bg-green-500"
-                            : "bg-gray-800"
+                        cell === "FREE" ? "bg-purple-500" : "bg-gray-800"
                       }`}
                     >
                       {cell === "FREE" ? "*" : cell}
