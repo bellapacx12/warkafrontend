@@ -4,34 +4,16 @@ import { useEffect } from "react";
 import Header from "@/components/Header";
 import GameRow from "@/components/GameRow";
 import BottomNav from "@/components/BottomNav";
-
+import { useLobby } from "@/lib/useLobby";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useGameStore } from "@/store/useGame";
 
 export default function Home() {
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
   const isLoaded = useAuthStore((s) => s.isLoaded);
 
-  const rooms = useGameStore((s) => s.rooms);
-  const connect = useGameStore((s) => s.connect);
-  const disconnect = useGameStore((s) => s.disconnect);
+  const games = useLobby(token); // 🔥 pass token
 
-  // 🔌 connect lobby socket once
-  useEffect(() => {
-    if (!token || !isLoaded || !user) return;
-
-    const alreadyConnected = useGameStore.getState().isConnected;
-    if (alreadyConnected) return;
-
-    connect(0); // lobby mode
-
-    return () => {
-      disconnect();
-    };
-  }, [token, isLoaded, user, connect, disconnect]);
-
-  // 🚨 redirect if not logged in
   useEffect(() => {
     if (isLoaded && !user) {
       window.location.href = "https://t.me/warkabingo1_bot";
@@ -53,10 +35,10 @@ export default function Home() {
           🎯 BINGO GAMES (Hi {user.name})
         </h2>
 
-        {rooms.length === 0 ? (
+        {games.length === 0 ? (
           <p className="text-gray-400">Loading games...</p>
         ) : (
-          rooms.map((g: any) => <GameRow key={g.stake} {...g} />)
+          games.map((g: any) => <GameRow key={g.stake} {...g} />)
         )}
       </div>
 
