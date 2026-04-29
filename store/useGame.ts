@@ -120,9 +120,7 @@ export const useGameStore = create<GameState>()(
                   : null,
               });
               break;
-            case "balance":
-              set({ balance: data });
-              break;
+
             // ==========================
             // CARD
             // ==========================

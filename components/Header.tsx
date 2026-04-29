@@ -1,9 +1,11 @@
 "use client";
 
-import { useGameStore } from "@/store/useGame";
+import { useBalance } from "@/lib/useBalance";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Header() {
-  const balance = useGameStore((s) => s.balance);
+  const token = useAuthStore((s) => s.token);
+  const { balance } = useBalance(token);
 
   return (
     <div className="p-4 border-b border-gray-700">
@@ -13,7 +15,6 @@ export default function Header() {
         <span>🟢 Live</span>
         <span>🏅 Bonus: 4.00</span>
 
-        {/* ✅ LIVE BALANCE */}
         <span>💰 Balance: {balance.toFixed(2)}</span>
       </div>
     </div>
