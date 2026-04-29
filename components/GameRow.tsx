@@ -27,7 +27,9 @@ export default function GameRow({
   const activeGame = useGameStore((s) => s.activeGame);
 
   const isRejoin =
-    activeGame && activeGame.stake === stake && activeGame.state !== "finished";
+    !!activeGame &&
+    activeGame.stake === stake &&
+    activeGame.state === "playing";
 
   const handleClick = () => {
     setStake(stake);
