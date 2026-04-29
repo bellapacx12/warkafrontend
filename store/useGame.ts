@@ -31,6 +31,7 @@ type GameState = {
   // ===== META =====
   stake: number;
   isConnected: boolean;
+  rooms: any[];
 
   _handler?: (msg: any) => void;
 
@@ -67,7 +68,7 @@ export const useGameStore = create<GameState>()(
       taken: [],
       selected: null,
       jackpot: 0,
-
+      rooms: [],
       // ===== META =====
       stake: 0,
       isConnected: false,
@@ -100,6 +101,11 @@ export const useGameStore = create<GameState>()(
             // ==========================
             // INIT
             // ==========================
+            case "rooms":
+              set({
+                rooms: data,
+              });
+              break;
             case "init":
               console.log("INIT DATA:", data);
               set({
