@@ -101,6 +101,7 @@ export const useGameStore = create<GameState>()(
             // INIT
             // ==========================
             case "init":
+              console.log("INIT DATA:", data);
               set({
                 calledNumbers: data.called || [],
                 countdown: data.countdown || 0,
