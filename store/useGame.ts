@@ -102,9 +102,11 @@ export const useGameStore = create<GameState>()(
             // INIT
             // ==========================
             case "rooms":
+              console.log(data);
               set({
                 rooms: data,
               });
+
               break;
             case "init":
               console.log("INIT DATA:", data);
