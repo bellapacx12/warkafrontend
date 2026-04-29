@@ -126,6 +126,7 @@ export const useGameStore = create<GameState>()(
             // ==========================
             case "card":
               if (data?.grid) {
+                set({ card: data.grid });
               } else if (data?.card) {
                 set({ card: data.card });
                 console.log(data.card);
