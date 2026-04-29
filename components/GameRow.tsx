@@ -24,10 +24,9 @@ export default function GameRow({
   const router = useRouter();
 
   const setStake = useGameStore((s) => s.setStake);
-  const activeGame = useGameStore((s) => s.activeGame);
+  const persistSession = useGameStore((s) => s.persistSession);
 
-  const isRejoin =
-    activeGame && activeGame.stake === stake && activeGame.state !== "finished";
+  const isRejoin = persistSession?.inGame && persistSession.stake === stake;
 
   const handleClick = () => {
     setStake(stake);

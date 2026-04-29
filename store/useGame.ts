@@ -47,6 +47,10 @@ type GameState = {
     stake: number;
     state: string;
   } | null;
+  persistSession: {
+    stake: number;
+    inGame: boolean;
+  } | null;
 };
 
 export const useGameStore = create<GameState>()(
@@ -62,7 +66,7 @@ export const useGameStore = create<GameState>()(
       winner: null,
 
       activeGame: null,
-
+      persistSession: null,
       // ===== LOBBY =====
       available: [],
       taken: [],
