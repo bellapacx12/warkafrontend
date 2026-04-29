@@ -120,7 +120,14 @@ export const useGameStore = create<GameState>()(
             // CARD
             // ==========================
             case "card":
-              set({ card: data.grid });
+              if (data?.grid) {
+                set({ card: data.grid });
+              } else if (data?.card) {
+                set({ card: data.card });
+                console.log(data.card);
+              } else {
+                console.warn("⚠️ Card event missing grid/card:", data);
+              }
               break;
 
             // ==========================
