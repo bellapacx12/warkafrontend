@@ -259,10 +259,21 @@ export const useGameStore = create<GameState>()(
         };
 
         connectGameWS(handler, () => {
-          sendWS({
-            type: "join",
-            stake,
-          });
+          const { activeGame } = get();
+
+          if (activeGame && activeGame.stake === stake) {
+            // 🔥 REJOIN FLOW
+            sendWS({
+              type: "rejoin",
+              stake,
+            });
+          } else {
+            // normal join
+            sendWS({
+              type: "join",
+              stake,
+            });
+          }
         });
 
         set({
