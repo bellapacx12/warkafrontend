@@ -128,18 +128,36 @@ export const useGameStore = create<GameState>()(
             // ==========================
             // CARD
             // ==========================
-            case "card":
-              console.log(data);
-              if (data?.grid) {
-                set({ card: data.grid });
-              } else if (data?.card) {
-                set({ card: data.card });
-                console.log(data.card);
-              } else {
-                console.warn("⚠️ Card event missing grid/card:", data);
-              }
-              break;
+            case "card": {
+              console.log("CARD EVENT RAW:", data);
 
+              let normalized: any[][] | null = null;
+
+              // ==========================
+              // FORMAT 1: { grid: [][] }
+              // ==========================
+              if (Array.isArray(data?.grid)) {
+                normalized = data.grid;
+              }
+
+              // ==========================
+              // FORMAT 2: { B,I,N,G,O }
+              // ==========================
+              else if (data?.B && data?.I && data?.N && data?.G && data?.O) {
+                normalized = [data.B, data.I, data.N, data.G, data.O];
+              }
+
+              // ==========================
+              // FAIL SAFE
+              // ==========================
+              if (!normalized) {
+                console.warn("⚠️ Unknown card format:", data);
+                return;
+              }
+
+              set({ card: normalized });
+              break;
+            }
             // ==========================
             // NUMBER CALL
             // ==========================
