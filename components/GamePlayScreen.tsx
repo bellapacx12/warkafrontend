@@ -26,10 +26,7 @@ export default function GamePlayScreen() {
       disconnect();
     };
   }, [stake]);
-  const flattenCard = (c: any) => {
-    if (!Array.isArray(c)) return [];
-    return c.flat ? c.flat() : [];
-  };
+
   const isCalled = (num: number | string) =>
     typeof num === "number" && calledNumbers.includes(num);
 
@@ -116,7 +113,7 @@ export default function GamePlayScreen() {
               </p>
             ) : (
               <div className="grid grid-cols-5 gap-1">
-                {flattenCard(card).map((cell: any, i: number) => {
+                {card.flat().map((cell: any, i: number) => {
                   return (
                     <div
                       key={i}
@@ -168,7 +165,7 @@ export default function GamePlayScreen() {
 
             {/* CARD */}
             <div className="grid grid-cols-5 gap-1 mb-3">
-              {flattenCard(winner.card).map((cell: any, i: number) => (
+              {winner.card.flat().map((cell: any, i: number) => (
                 <div
                   key={i}
                   className={`aspect-square flex items-center justify-center rounded text-xs font-bold ${
