@@ -88,37 +88,53 @@ export const useGameStore = create<GameState>()(
       // CONNECT
       // ==========================
       connect: (stake: number, rejoin = false) => {
-        const { isConnected } = get();
-        if (isConnected && !rejoin) return;
+        const { _handler } = get();
 
-        // 🔥 IMPORTANT: set active game immediately
+        // 🔥 ALWAYS clean previous connection
+        if (_handler) {
+          removeListener(_handler);
+        }
+
+        disconnectWS();
+
+        // 🔥 set session state
         set({
+          stake,
           activeGame: {
             stake,
             state: rejoin ? "playing" : "waiting",
           },
+          persistSession: {
+            stake,
+            inGame: true,
+          },
         });
+
         const handler = (msg: any) => {
           const { type, data } = msg;
 
           switch (type) {
             // ==========================
-            // INIT
+            // LOBBY ROOMS
             // ==========================
             case "rooms":
-              console.log(data);
-              set({
-                rooms: data,
-              });
-
+              set({ rooms: data });
               break;
+
+            // ==========================
+            // CARD (FIXED)
+            // ==========================
+            case "card":
+              set({ card: data }); // ✅ backend sends raw card
+              break;
+
+            // ==========================
+            // INIT
+            // ==========================
             case "init":
-              console.log("INIT DATA:", data);
               set({
                 calledNumbers: data.called || [],
                 countdown: data.countdown || 0,
-
-                // ✅ FIX: restore last number properly
                 currentNumber: data.called?.length
                   ? data.called[data.called.length - 1]
                   : null,
@@ -126,31 +142,15 @@ export const useGameStore = create<GameState>()(
               break;
 
             // ==========================
-            // CARD
-            // ==========================
-            case "card":
-              if (data?.grid) {
-                set({ card: data.grid });
-              } else if (data?.card) {
-                set({ card: data.card });
-                console.log(data.card);
-              } else {
-                console.warn("⚠️ Card event missing grid/card:", data);
-              }
-              break;
-
-            // ==========================
-            // NUMBER CALL
+            // NUMBER
             // ==========================
             case "number":
               set((state) => {
-                const exists = state.calledNumbers.includes(data);
+                if (state.calledNumbers.includes(data)) return state;
 
                 return {
                   currentNumber: data,
-                  calledNumbers: exists
-                    ? state.calledNumbers
-                    : [...state.calledNumbers, data],
+                  calledNumbers: [...state.calledNumbers, data],
                 };
               });
               break;
@@ -168,7 +168,7 @@ export const useGameStore = create<GameState>()(
               break;
 
             // ==========================
-            // GAME START (RESET ROUND UI)
+            // START
             // ==========================
             case "start":
               set((s) => ({
@@ -183,7 +183,7 @@ export const useGameStore = create<GameState>()(
               break;
 
             // ==========================
-            // WINNER 🎉
+            // WINNER
             // ==========================
             case "winner":
               set({
@@ -195,9 +195,10 @@ export const useGameStore = create<GameState>()(
               break;
 
             // ==========================
-            // ROUND RESET (SERVER FORCES RESET)
+            // RESET
             // ==========================
             case "round_reset":
+            case "game_finished":
               set({
                 calledNumbers: [],
                 currentNumber: null,
@@ -205,22 +206,13 @@ export const useGameStore = create<GameState>()(
                 card: null,
                 selected: null,
                 winner: null,
-                activeGame: null, // ✅ important
+                activeGame: null,
+                persistSession: null,
               });
               break;
 
-            case "active_game":
-              set((s) => ({
-                activeGame: s.activeGame
-                  ? s.activeGame
-                  : {
-                      stake,
-                      state: rejoin ? "playing" : "waiting",
-                    },
-              }));
-              break;
             // ==========================
-            // LOBBY
+            // LOBBY CARDS
             // ==========================
             case "cards":
               set({ available: data.map((c: any) => c.card_id) });
@@ -243,37 +235,22 @@ export const useGameStore = create<GameState>()(
             case "jackpot":
               set({ jackpot: data });
               break;
-            case "game_finished":
-              set({
-                activeGame: null,
-                calledNumbers: [],
-                currentNumber: null,
-                countdown: 0,
-                card: null,
-              });
-              break;
 
             default:
               console.log("⚠️ Unknown WS event:", type);
           }
         };
 
+        // 🔥 connect fresh every time
         connectGameWS(handler, () => {
           if (rejoin) {
-            sendWS({
-              type: "rejoin",
-              stake,
-            });
+            sendWS({ type: "rejoin", stake });
           } else {
-            sendWS({
-              type: "join",
-              stake,
-            });
+            sendWS({ type: "join", stake });
           }
         });
 
         set({
-          stake,
           isConnected: true,
           _handler: handler,
         });
