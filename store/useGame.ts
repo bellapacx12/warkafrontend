@@ -89,7 +89,7 @@ export const useGameStore = create<GameState>()(
       // ==========================
       connect: (stake: number, rejoin = false) => {
         const { isConnected } = get();
-        if (isConnected) return;
+        if (isConnected && !rejoin) return;
 
         // 🔥 IMPORTANT: set active game immediately
         set({
@@ -259,10 +259,17 @@ export const useGameStore = create<GameState>()(
         };
 
         connectGameWS(handler, () => {
-          sendWS({
-            type: "join",
-            stake,
-          });
+          if (rejoin) {
+            sendWS({
+              type: "rejoin",
+              stake,
+            });
+          } else {
+            sendWS({
+              type: "join",
+              stake,
+            });
+          }
         });
 
         set({
