@@ -13,7 +13,7 @@ type Winner = {
 };
 
 type GameState = {
-  // ===== GAME =====
+  // ===== GAME =====z
   calledNumbers: number[];
   currentNumber: number | null;
   countdown: number;
